@@ -6,7 +6,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_apigateway as apigw
 )
-
+from hitcounterLambda.hitcounter import HitCounter
 
 class GhostApigatewayStack(Stack):
 
@@ -16,12 +16,17 @@ class GhostApigatewayStack(Stack):
         #Definiendo un recurso de lambda
         dummy_lambda = _lambda.Function(
             self, 'Handler',
-            runtime=_lambda.Runtime.PYTHON_3_7,
+            runtime=_lambda.Runtime.PYTHON_3_8,
             code=_lambda.Code.from_asset('dummy-lambda'),
             handler='dummy-lambda.handler'
         )
 
+        hello_with_counter = HitCounter(
+            self, 'HelloHitCounter',
+            downstream=dummy_lambda,
+        )
+
         apigw.LambdaRestApi(
             self, 'ghost-apigateway-domain',
-            handler=dummy_lambda,
+            handler=hello_with_counter._handler,
         )
